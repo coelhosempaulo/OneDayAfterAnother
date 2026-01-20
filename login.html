@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - One day after another</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* (Seus estilos continuam iguais, apenas adicionei margem para o input de nome) */
+        body { margin: 0; font-family: 'Montserrat', sans-serif; }
+        .login-container {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #FF8C42 0%, #2e2e2e 100%); padding: 20px;
+        }
+        .login-card {
+            background: white; border-radius: 15px; padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2); width: 100%; max-width: 380px; text-align: center;
+        }
+        .login-logo { font-size: 1.8rem; font-weight: 700; color: #333; margin-bottom: 5px; }
+        .login-subtitle { color: #666; margin-bottom: 30px; font-size: 0.9rem; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-label { display: block; margin-bottom: 5px; color: #333; font-weight: 600; font-size: 0.9rem; }
+        .form-input {
+            width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px;
+            font-size: 16px; transition: border-color 0.3s ease; box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .form-input:focus { outline: none; border-color: #FF8C42; }
+        .btn-group { display: flex; gap: 10px; flex-direction: column; margin-top: 20px; }
+        .login-btn {
+            width: 100%; padding: 14px; background: #FF8C42; color: white; border: none;
+            border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s;
+        }
+        .login-btn:hover { transform: translateY(-2px); background: #e67e3a; }
+        .signup-btn {
+            width: 100%; padding: 14px; background: transparent; border: 2px solid #FF8C42;
+            color: #FF8C42; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;
+        }
+        .signup-btn:hover { background: #fff5eb; }
+        .message { margin-top: 15px; font-size: 14px; padding: 10px; border-radius: 5px; display: none; }
+        .error { color: #c0392b; background: #fadbd8; border: 1px solid #c0392b; }
+        .success { color: #27ae60; background: #e8f8f5; border: 1px solid #27ae60; }
+        .loading { opacity: 0.7; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">One day after another</div>
+            <div class="login-subtitle">Entre para gerenciar seus hábitos</div>
+
+            <form id="auth-form">
+                <div class="form-group">
+                    <label for="name" class="form-label">Seu Nome (Apenas para criar conta)</label>
+                    <input type="text" id="name" class="form-input" placeholder="Ex: Pedro">
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">E-mail</label>
+                    <input type="email" id="email" class="form-input" placeholder="exemplo@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Senha</label>
+                    <input type="password" id="password" class="form-input" placeholder="Sua senha" required minlength="6">
+                </div>
+
+                <div class="message" id="msg-box"></div>
+
+                <div class="btn-group">
+                    <button type="submit" id="login-btn" class="login-btn">Entrar</button>
+                    <button type="button" id="signup-btn" class="signup-btn">Criar Conta Nova</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURAÇÃO SUPABASE ---
+        const SUPABASE_URL = 'https://chyntmcnydprvusrdclr.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoeW50bWNueWRwcnZ1c3JkY2xyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MjQxMjgsImV4cCI6MjA4NDUwMDEyOH0.HZLj-hYDHV2Ef9CG7p8mJcoHARs8dMO3M_-BJRXsH68';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Elementos
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const nameInput = document.getElementById('name'); // Novo campo
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const msgBox = document.getElementById('msg-box');
+
+        function showMessage(text, type) {
+            msgBox.textContent = text;
+            msgBox.className = 'message ' + type;
+            msgBox.style.display = 'block';
+        }
+
+        // LOGIN
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            loginBtn.textContent = 'Entrando...';
+            loginBtn.classList.add('loading');
+
+            const { error } = await supabaseClient.auth.signInWithPassword({
+                email, password
+            });
+
+            if (error) {
+                showMessage("E-mail ou senha incorretos.", 'error');
+                loginBtn.textContent = 'Entrar';
+                loginBtn.classList.remove('loading');
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // CADASTRO COM NOME
+        signupBtn.addEventListener('click', async () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            const name = nameInput.value; // Pega o nome digitado
+
+            if (!email || !password) {
+                showMessage('Preencha e-mail e senha.', 'error');
+                return;
+            }
+            if (!name) {
+                showMessage('Por favor, digite seu nome para o cadastro.', 'error');
+                return;
+            }
+
+            signupBtn.textContent = 'Criando...';
+            signupBtn.classList.add('loading');
+
+            // AQUI ESTÁ O TRUQUE: Enviamos o nome dentro de "options > data"
+            const { error } = await supabaseClient.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: {
+                        display_name: name // Salva o nome no Supabase
+                    }
+                }
+            });
+
+            if (error) {
+                showMessage('Erro: ' + error.message, 'error');
+                signupBtn.textContent = 'Criar Conta Nova';
+                signupBtn.classList.remove('loading');
+            } else {
+                showMessage('Conta criada! Entrando...', 'success');
+                setTimeout(() => window.location.href = 'index.html', 1500);
+            }
+        });
+    </script>
+</body>
+</html>

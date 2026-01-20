@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One day after another - Habit Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="app">
+        <nav class="navbar">
+            <div class="nav-brand">One day after another</div>
+            <div class="nav-user">
+                <span id="user-greeting">Carregando...</span>
+                <a href="#" id="logout-link">Sair</a>
+            </div>
+        </nav>
+        
+        <div class="nav-tabs">
+            <button class="tab-btn active" data-tab="tracker">Tracker</button>
+            <button class="tab-btn" data-tab="stats">Estatísticas</button>
+        </div>
+
+        <div class="content">
+            <div id="tracker-tab" class="tab-content active">
+                <h1 id="month-title">Carregando...</h1>
+                <div class="week-nav">
+                    <button id="prev-week">← Semana Anterior</button>
+                    <span id="current-week">Semana Atual</span>
+                    <button id="next-week">Próxima Semana →</button>
+                </div>
+                <div class="tracker-table">
+                    <div class="table-header">
+                        <div class="header-cell habit-header">Hábitos</div>
+                        <div id="days-header" class="days-header"></div>
+                    </div>
+                    <div id="habits-rows" class="table-body"></div>
+                    <div class="add-habit-row">
+                        <input type="text" id="new-habit" placeholder="Novo hábito...">
+                        <button id="add-habit">Adicionar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="stats-tab" class="tab-content">
+                <div class="stats-nav">
+                    <button class="stats-subtab active" data-subtab="weekly">Semanal</button>
+                    <button class="stats-subtab" data-subtab="monthly">Mensal</button>
+                </div>
+                <div id="weekly-stats" class="subtab-content active">
+                    <h2>Estatísticas Semanais</h2>
+                    <div class="stats-overview">
+                        <div class="stat-card"><h3>Total</h3><span id="total-habits-weekly">0</span></div>
+                        <div class="stat-card"><h3>Conclusão</h3><span id="avg-completion-weekly">0%</span></div>
+                        <div class="stat-card"><h3>Dias Ativos</h3><span id="active-days-weekly">0</span></div>
+                        <div class="stat-card"><h3>Sequência</h3><span id="current-streak-weekly">0</span></div>
+                    </div>
+                    <h3>Progresso</h3><div id="weekly-progress"></div>
+                    <h3>Desempenho</h3><div id="habit-performance-weekly"></div>
+                </div>
+                <div id="monthly-stats" class="subtab-content">
+                    <h2>Estatísticas Mensais</h2>
+                    <div class="stats-overview">
+                        <div class="stat-card"><h3>Total</h3><span id="total-habits-monthly">0</span></div>
+                        <div class="stat-card"><h3>Conclusão</h3><span id="avg-completion-monthly">0%</span></div>
+                        <div class="stat-card"><h3>Dias Ativos</h3><span id="active-days-monthly">0</span></div>
+                        <div class="stat-card"><h3>Sequência</h3><span id="current-streak-monthly">0</span></div>
+                    </div>
+                    <h3>Progresso</h3><div id="monthly-progress"></div>
+                    <h3>Desempenho</h3><div id="habit-performance-monthly"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
